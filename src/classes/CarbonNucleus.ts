@@ -8,8 +8,11 @@ export const amu = 1.66053906660e-27 // kg
  */
 export default class CarbonNucleus extends Particle {
 
-    constructor(position: Coordinates, velocity: Coordinates, acceleration: Coordinates, radius: number, mass: number, color: string) {
+    constructor(position: Coordinates, velocity: Coordinates, acceleration: Coordinates) {
         const carbonNucleusMass = 12 * amu
-        super(position, velocity, acceleration, radius, carbonNucleusMass, color)
+        super(position, velocity, acceleration,
+            1 /* radii are not supposed to represent something but for representation */, carbonNucleusMass, 6, "#000000")
     }
+
+
 }

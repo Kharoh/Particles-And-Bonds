@@ -1,5 +1,5 @@
 import { Coordinates } from "../global"
-import Bond from "./Bond"
+import WeakBond from "./WeakBond"
 
 export default class Particle {
 
@@ -8,15 +8,17 @@ export default class Particle {
     private _acceleration: Coordinates
     private _radius: number
     private _mass: number
-    private _color: string
-    private _bonds: [Bond, Particle][] = []
+    private _charge: number
+    private _color: string /* Hexadecimal e.g. #000000 */
+    private _bonds: [WeakBond, Particle][] = []
 
-    constructor(position: Coordinates, velocity: Coordinates, acceleration: Coordinates, radius: number, mass: number, color: string) {
+    constructor(position: Coordinates, velocity: Coordinates, acceleration: Coordinates, radius: number, mass: number, charge: number, color: string) {
         this._position = position
         this._velocity = velocity
         this._acceleration = acceleration
         this._radius = radius
         this._mass = mass
+        this._charge = charge
         this._color = color
     }
 
@@ -60,6 +62,14 @@ export default class Particle {
         this._mass = value
     }
 
+    public get charge(): number {
+        return this._charge
+    }
+
+    public set charge(value: number) {
+        this._charge = value
+    }
+
     public get color(): string {
         return this._color
     }
@@ -68,8 +78,9 @@ export default class Particle {
         this._color = value
     }
 
-    public get bonds(): [Bond, Particle][] {
+    public get bonds(): [WeakBond, Particle][] {
         return this._bonds
     }
+
 
 }
