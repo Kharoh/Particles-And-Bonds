@@ -1,8 +1,8 @@
 import Particle from "./Particle";
 import Utils from "./Utils";
 
-const ELECTRICAL_CONSTANT = 250
-const FRICTION_CONSTANT = 0.9995
+const ELECTRICAL_CONSTANT = 5
+const FRICTION_CONSTANT = 0.98
 
 export default class Force {
 
@@ -24,7 +24,7 @@ export default class Force {
      */
     private static workoutElectricForce(particleA: Particle, particleB: Particle) {
         const distanceSquared = Utils.workoutDistanceSquared(particleA.position, particleB.position)
-        const force = ELECTRICAL_CONSTANT * particleA.charge * particleB.charge / distanceSquared
+        const force = (-1) * ELECTRICAL_CONSTANT * particleA.charge * particleB.charge / distanceSquared
         const direction = Utils.workoutDirection(particleA.position, particleB.position)
         return {
             x: direction.x * force,

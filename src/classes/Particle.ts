@@ -1,4 +1,5 @@
 import { Coordinates } from "../global"
+import Covalence from "./Covalence"
 import Force from "./Force"
 import Renderer from "./Renderer"
 import Utils from "./Utils"
@@ -23,6 +24,8 @@ export default class Particle {
     private _positionProjection: Coordinates // on peut ajouter des particules qui font intéragir avec leurs pos préc
     private _scaleProjection: number
 
+    public covalence: Covalence[]
+
     constructor(id: string, position: Coordinates, velocity: Coordinates, acceleration: Coordinates, radius: number, mass: number, charge: number, color: string, isFixed?: boolean) {
         this.id = id
 
@@ -37,6 +40,8 @@ export default class Particle {
         this.color = color
         this._positionProjection = { x: 0, y: 0, z: 0 }
         this._scaleProjection = 0
+
+        this.covalence = []
     }
 
     public get position(): Coordinates {
@@ -116,6 +121,7 @@ export default class Particle {
         // First update the acceleration based on the forces, then velocity and finally position
         this._updatedAcceleration = { x: 0, y: 0, z: 0 }
 
+        this.applyCovalence()
         particles.forEach(particle => {
             if (particle.id === this.id) return
             this.applyParticleForce(particle)
@@ -161,6 +167,29 @@ export default class Particle {
 
     private applyFriction() {
         this._updatedVelocity = Utils.scaleCoordinates(this._updatedVelocity, Force.FRICTION.constant)
+    }
+
+    private applyCovalence() {
+        console.log(this._updatedAcceleration)
+        // Apply covalent force
+        for (const covalence of this.covalence) {
+            const direction = Utils.workoutUnitVector(this.position, covalence.getOtherParticle(this).position)
+            console.log(this.position, covalence.getOtherParticle(this).position)
+            this._updatedAcceleration = Utils.addCoordinates(this._updatedAcceleration,
+                Utils.scaleCoordinates(Utils.scaleCoordinates(direction, covalence.getAbsForceNorm()), 1 / this.mass))
+        }
+        console.log(this._updatedAcceleration)
+    }
+
+
+
+
+    /*
+     * HANDLE COVALENCE
+     */
+
+    public addCovalence(covalence: Covalence) {
+        this.covalence.push(covalence)
     }
 
 }
