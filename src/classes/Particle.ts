@@ -21,7 +21,7 @@ export default class Particle {
 
     private radius: number
     private color: string /* Hexadecimal e.g. #000000 */
-    private _positionProjection: Coordinates // on peut ajouter des particules qui font intéragir avec leurs pos préc
+    public positionProjection: Coordinates // on peut ajouter des particules qui font intéragir avec leurs pos préc
     private _scaleProjection: number
 
     public covalence: Covalence[]
@@ -38,7 +38,7 @@ export default class Particle {
 
         this.radius = radius
         this.color = color
-        this._positionProjection = { x: 0, y: 0, z: 0 }
+        this.positionProjection = { x: 0, y: 0, z: 0 }
         this._scaleProjection = 0
 
         this.covalence = []
@@ -96,9 +96,9 @@ export default class Particle {
         // The scaleProjected will store the scale of the element based on its distance from the 'camera'
         this._scaleProjection = perspective / (perspective + this.position.z)
         // The xProjected is the x position on the 2D world
-        this._positionProjection.x = (this.position.x * this._scaleProjection) + renderer.projectionCenterX
+        this.positionProjection.x = (this.position.x * this._scaleProjection) + renderer.projectionCenterX
         // The yProjected is the y position on the 2D world
-        this._positionProjection.y = (this.position.y * this._scaleProjection) + renderer.projectionCenterY
+        this.positionProjection.y = (this.position.y * this._scaleProjection) + renderer.projectionCenterY
     }
 
     public draw(renderer: Renderer) {
@@ -109,10 +109,9 @@ export default class Particle {
         // We draw a rectangle based on the projected coordinates and scale
         renderer.ctx.fillStyle = this.color
         renderer.ctx.beginPath()
-        renderer.ctx.arc(this._positionProjection.x, this._positionProjection.y, this.radius, 0, 2 * Math.PI)
+        renderer.ctx.arc(this.positionProjection.x, this.positionProjection.y,
+            Math.max(this.radius + this.position.z / renderer.canvasWidth * 100, 1), 0, 2 * Math.PI)
         renderer.ctx.fill()
-
-        renderer.ctx.globalAlpha = 1
     }
 
     public update(particles: Particle[]) {

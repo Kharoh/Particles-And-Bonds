@@ -1,3 +1,4 @@
+import Covalence from "./Covalence"
 import Particle from "./Particle"
 
 export default class Renderer {
@@ -5,15 +6,17 @@ export default class Renderer {
     public ctx: CanvasRenderingContext2D
 
     public particles: Particle[]
+    public covalences: Covalence[]
 
     public projectionCenterX: number
     public projectionCenterY: number
 
-    constructor(particles: Particle[]) {
+    constructor(particles: Particle[], covalences: Covalence[]) {
         this.canvas = document.getElementsByTagName('canvas')[0]
         this.ctx = this.canvas.getContext('2d')
 
         this.particles = particles
+        this.covalences = covalences
 
         this.canvasHeight = this.canvas.offsetHeight
         this.canvasWidth = this.canvas.offsetWidth
@@ -49,6 +52,7 @@ export default class Renderer {
     public draw() {
         this.resetCanvas()
         this.particles.forEach(particle => particle.draw(this))
+        this.covalences.forEach(covalence => covalence.draw(this))
     }
 
     public update() {

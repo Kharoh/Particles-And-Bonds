@@ -1,4 +1,5 @@
 import Particle from "./Particle"
+import Renderer from "./Renderer"
 import Utils from "./Utils"
 
 const COVALENCE_CONSTANT = 0.001
@@ -29,5 +30,13 @@ export default class Covalence {
     public getOtherParticle(baseParticle: Particle): Particle {
         if (this.particleA.id === baseParticle.id) return this.particleB
         return this.particleA
+    }
+
+    public draw(renderer: Renderer) {
+        renderer.ctx.lineWidth = 1
+        renderer.ctx.strokeStyle = "white"
+        renderer.ctx.moveTo(this.particleA.positionProjection.x, this.particleA.positionProjection.y)
+        renderer.ctx.lineTo(this.particleB.positionProjection.x, this.particleB.positionProjection.y)
+        renderer.ctx.stroke()
     }
 }
