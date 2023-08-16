@@ -1,5 +1,6 @@
 import { Coordinates } from "../global"
 import Covalence from "./Covalence"
+import Field from "./Field"
 import Force from "./Force"
 import Renderer from "./Renderer"
 import Utils from "./Utils"
@@ -8,16 +9,15 @@ export default class Particle {
 
     public id: string
 
-    private _updatedPosition: Coordinates
-    private _updatedVelocity: Coordinates
-    private _updatedAcceleration: Coordinates
+    public _updatedPosition: Coordinates
+    public _updatedVelocity: Coordinates
+    public _updatedAcceleration: Coordinates
 
     public isFixed: boolean
     private _position: Coordinates
     private _velocity: Coordinates
     private _acceleration: Coordinates
     private _mass: number
-    private _charge: number
 
     private radius: number
     private color: string /* Hexadecimal e.g. #000000 */
@@ -25,8 +25,9 @@ export default class Particle {
     private _scaleProjection: number
 
     public covalence: Covalence[]
+    public fields: Field[]
 
-    constructor(id: string, position: Coordinates, velocity: Coordinates, acceleration: Coordinates, radius: number, mass: number, charge: number, color: string, isFixed?: boolean) {
+    constructor(id: string, position: Coordinates, velocity: Coordinates, acceleration: Coordinates, radius: number, mass: number, color: string, isFixed?: boolean) {
         this.id = id
 
         this.isFixed = !!isFixed
@@ -34,7 +35,6 @@ export default class Particle {
         this._velocity = velocity
         this._acceleration = acceleration
         this._mass = mass
-        this._charge = charge
 
         this.radius = radius
         this.color = color
@@ -42,6 +42,7 @@ export default class Particle {
         this._scaleProjection = 0
 
         this.covalence = []
+        this.fields = []
     }
 
     public get position(): Coordinates {
@@ -74,14 +75,6 @@ export default class Particle {
 
     public set mass(value: number) {
         this._mass = value
-    }
-
-    public get charge(): number {
-        return this._charge
-    }
-
-    public set charge(value: number) {
-        this._charge = value
     }
 
 
@@ -121,10 +114,7 @@ export default class Particle {
         this._updatedAcceleration = { x: 0, y: 0, z: 0 }
 
         this.applyCovalence()
-        particles.forEach(particle => {
-            if (particle.id === this.id) return
-            this.applyParticleForce(particle)
-        })
+        this.applyFields()
 
         // Update the particle's velocity based on the acceleration
         this._updatedVelocity = {
@@ -158,26 +148,24 @@ export default class Particle {
      * ABOUT THE ENVIRONMENT
      */
 
-    private applyParticleForce(particle: Particle) {
-        // Apply electric force
-        const electricForce = Force.ELECTRIC.calculate(this, particle)
-        this._updatedAcceleration = Utils.addCoordinates(this._updatedAcceleration, Utils.scaleCoordinates(electricForce, 1 / this.mass))
-    }
-
     private applyFriction() {
         this._updatedVelocity = Utils.scaleCoordinates(this._updatedVelocity, Force.FRICTION.constant)
     }
 
     private applyCovalence() {
-        console.log(this._updatedAcceleration)
         // Apply covalent force
         for (const covalence of this.covalence) {
             const direction = Utils.workoutUnitVector(this.position, covalence.getOtherParticle(this).position)
-            console.log(this.position, covalence.getOtherParticle(this).position)
             this._updatedAcceleration = Utils.addCoordinates(this._updatedAcceleration,
                 Utils.scaleCoordinates(Utils.scaleCoordinates(direction, covalence.getAbsForceNorm()), 1 / this.mass))
         }
-        console.log(this._updatedAcceleration)
+    }
+
+    private applyFields() {
+        // Applied the forces created by fields
+        for (const field of this.fields) {
+            field.applyForce(this)
+        }
     }
 
 
@@ -190,5 +178,19 @@ export default class Particle {
     public addCovalence(covalence: Covalence) {
         this.covalence.push(covalence)
     }
+
+
+
+
+    /*
+     * HANDLE FIELDS
+     */
+
+    public subscribeToElectricField(electricField: Field, charge: number) {
+        electricField.subscribe(this, charge)
+        this.fields.push(electricField)
+        console.log(electricField.interactingParticles)
+    }
+
 
 }
